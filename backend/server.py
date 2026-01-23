@@ -117,7 +117,7 @@ async def upload_background(file: UploadFile = File(...)):
     await db.settings.update_one({}, {"$set": {"background_image": data_url}}, upsert=True)
     return {"success": True, "background_image": data_url}
 
-@api_router.post("/memories", response_model=Memory)
+@api_router.post("/memories", response_model=Memory, status_code=201)
 async def create_memory(memory: MemoryCreate):
     memory_obj = Memory(**memory.model_dump())
     doc = memory_obj.model_dump()
