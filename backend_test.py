@@ -121,6 +121,25 @@ class MemoraAPITester:
         )
         return success, response
 
+    def test_create_memory_with_tone(self):
+        """Test creating a memory with tone"""
+        memory_data = {
+            "guest_name": "Test Guest with Tone",
+            "message": "This is a wise message for the couple!",
+            "photo": None,
+            "tone": "wise"
+        }
+        success, response = self.run_test(
+            "Create Memory with Tone",
+            "POST",
+            "memories",
+            201,
+            data=memory_data
+        )
+        if success and response.get('tone') != 'wise':
+            print(f"⚠️  Warning: Expected tone 'wise', got '{response.get('tone')}'")
+        return success, response
+
     def test_get_memories(self):
         """Test getting all memories"""
         return self.run_test("Get Memories", "GET", "memories", 200)
