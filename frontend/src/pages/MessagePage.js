@@ -7,9 +7,8 @@ const MAX_CHARS = 200;
 
 const MessagePage = () => {
   const navigate = useNavigate();
-  const { message, setMessage, guestName, submitMemory, settings } = useMemora();
+  const { message, setMessage, guestName, selectedTone, settings } = useMemora();
   const [inputValue, setInputValue] = useState(message);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Redirect if no name entered
   useEffect(() => {
@@ -25,18 +24,19 @@ const MessagePage = () => {
     }
   };
 
-  const handleSubmit = async () => {
-    if (inputValue.trim() && !isSubmitting) {
-      setIsSubmitting(true);
+  const handleContinue = () => {
+    if (inputValue.trim()) {
       setMessage(inputValue.trim());
-      try {
-        await submitMemory();
-        navigate('/memory');
-      } catch (error) {
-        console.error('Error saving memory:', error);
-        setIsSubmitting(false);
-      }
+      navigate('/memory');
     }
+  };
+
+  // Get the question based on selected tone
+  const getQuestion = () => {
+    if (selectedTone && settings.tone_questions && settings.tone_questions[selectedTone]) {
+      return settings.tone_questions[selectedTone];
+    }
+    return "What do you wish them never to forget?";
   };
 
   const backgroundImage = settings.background_image || 'https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80';
@@ -67,7 +67,7 @@ const MessagePage = () => {
           className="font-serif text-2xl md:text-3xl text-stone-800 text-center mb-8"
           data-testid="page-title"
         >
-          What do you wish them never to forget?
+          {getQuestion()}
         </motion.h1>
 
         {/* Glass card form */}
@@ -102,12 +102,12 @@ const MessagePage = () => {
           transition={{ delay: 0.6 }}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={handleSubmit}
-          disabled={!inputValue.trim() || isSubmitting}
+          onClick={handleContinue}
+          disabled={!inputValue.trim()}
           className="memora-btn w-full mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
           data-testid="save-button"
         >
-          {isSubmitting ? 'Saving...' : 'Save memory'}
+          Save memory
         </motion.button>
       </motion.div>
     </div>

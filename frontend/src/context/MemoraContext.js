@@ -10,10 +10,18 @@ export const MemoraProvider = ({ children }) => {
   const [guestName, setGuestName] = useState('');
   const [photo, setPhoto] = useState(null);
   const [message, setMessage] = useState('');
+  const [selectedTone, setSelectedTone] = useState(null);
   const [settings, setSettings] = useState({
     couple_names: 'Anna & Nemanja',
     welcome_text: 'Leave a memory for',
-    background_image: null
+    background_image: null,
+    tone_page_enabled: true,
+    tone_questions: {
+      wise: "What wisdom would you share with them?",
+      funny: "What's a funny memory or joke for them?",
+      advice: "What advice would you give them?",
+      emotional: "What heartfelt message do you have for them?"
+    }
   });
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -25,7 +33,7 @@ export const MemoraProvider = ({ children }) => {
   const fetchSettings = async () => {
     try {
       const response = await axios.get(`${API}/settings`);
-      setSettings(response.data);
+      setSettings(prev => ({ ...prev, ...response.data }));
     } catch (error) {
       console.error('Error fetching settings:', error);
     } finally {
@@ -36,7 +44,7 @@ export const MemoraProvider = ({ children }) => {
   const updateSettings = async (newSettings) => {
     try {
       const response = await axios.put(`${API}/admin/settings`, newSettings);
-      setSettings(response.data);
+      setSettings(prev => ({ ...prev, ...response.data }));
       return response.data;
     } catch (error) {
       console.error('Error updating settings:', error);
@@ -62,7 +70,8 @@ export const MemoraProvider = ({ children }) => {
       const response = await axios.post(`${API}/memories`, {
         guest_name: guestName,
         photo: photo,
-        message: message
+        message: message,
+        tone: selectedTone
       });
       return response.data;
     } catch (error) {
@@ -75,6 +84,7 @@ export const MemoraProvider = ({ children }) => {
     setGuestName('');
     setPhoto(null);
     setMessage('');
+    setSelectedTone(null);
   };
 
   const value = {
@@ -84,6 +94,8 @@ export const MemoraProvider = ({ children }) => {
     setPhoto,
     message,
     setMessage,
+    selectedTone,
+    setSelectedTone,
     settings,
     setSettings,
     fetchSettings,

@@ -3,6 +3,58 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Settings } from 'lucide-react';
 
+// SVG Logo component matching the original design
+const MemoraLogo = ({ className = "" }) => (
+  <svg 
+    width="100" 
+    height="90" 
+    viewBox="0 0 100 90" 
+    fill="none" 
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+  >
+    {/* M shape with crown-like top */}
+    <path 
+      d="M10 75V25L30 50L50 20L70 50L90 25V75" 
+      stroke="currentColor" 
+      strokeWidth="3" 
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    {/* Left vertical line */}
+    <path 
+      d="M30 50V75" 
+      stroke="currentColor" 
+      strokeWidth="3" 
+      strokeLinecap="round"
+    />
+    {/* Right vertical line */}
+    <path 
+      d="M70 50V75" 
+      stroke="currentColor" 
+      strokeWidth="3" 
+      strokeLinecap="round"
+    />
+    {/* Top crown detail */}
+    <path 
+      d="M42 12L50 4L58 12" 
+      stroke="currentColor" 
+      strokeWidth="2" 
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    {/* Horizontal line under crown */}
+    <path 
+      d="M35 18L65 18" 
+      stroke="currentColor" 
+      strokeWidth="1.5" 
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
 const LandingPage = () => {
   const navigate = useNavigate();
 
@@ -36,47 +88,9 @@ const LandingPage = () => {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="mb-8"
+          className="mb-8 text-stone-900"
         >
-          <svg 
-            width="120" 
-            height="100" 
-            viewBox="0 0 120 100" 
-            fill="none" 
-            xmlns="http://www.w3.org/2000/svg"
-            className="text-stone-900"
-          >
-            {/* M Logo */}
-            <path 
-              d="M20 80V30L40 55L60 30L80 55L100 30V80" 
-              stroke="currentColor" 
-              strokeWidth="3" 
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path 
-              d="M40 55V80" 
-              stroke="currentColor" 
-              strokeWidth="3" 
-              strokeLinecap="round"
-            />
-            <path 
-              d="M80 55V80" 
-              stroke="currentColor" 
-              strokeWidth="3" 
-              strokeLinecap="round"
-            />
-            {/* Top decoration */}
-            <path 
-              d="M50 20L60 10L70 20" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <MemoraLogo />
         </motion.div>
 
         {/* Brand name */}

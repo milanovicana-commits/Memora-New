@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useMemora } from '../context/MemoraContext';
@@ -6,18 +6,41 @@ import { User } from 'lucide-react';
 
 const FinalMemoryPage = () => {
   const navigate = useNavigate();
-  const { guestName, photo, message, resetMemory } = useMemora();
+  const { guestName, photo, message, selectedTone, settings, submitMemory, resetMemory } = useMemora();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
   // Redirect if no name entered
   useEffect(() => {
     if (!guestName) {
       navigate('/');
+      return;
     }
-  }, [guestName, navigate]);
 
-  const handleNewMemory = () => {
-    resetMemory();
-    navigate('/');
+    // Submit memory when page loads (only once)
+    if (!hasSubmitted && !isSubmitting) {
+      setIsSubmitting(true);
+      submitMemory()
+        .then(() => {
+          setHasSubmitted(true);
+          // Navigate to thank you page after brief display
+          setTimeout(() => {
+            navigate('/thankyou');
+          }, 2000);
+        })
+        .catch((error) => {
+          console.error('Error submitting memory:', error);
+          setIsSubmitting(false);
+        });
+    }
+  }, [guestName, navigate, submitMemory, hasSubmitted, isSubmitting]);
+
+  // Get the question based on selected tone
+  const getQuestion = () => {
+    if (selectedTone && settings.tone_questions && settings.tone_questions[selectedTone]) {
+      return settings.tone_questions[selectedTone];
+    }
+    return "What do you wish them never to forget?";
   };
 
   return (
@@ -107,7 +130,7 @@ const FinalMemoryPage = () => {
             transition={{ delay: 0.6 }}
             className="font-accent text-lg italic text-stone-600 text-center mb-4"
           >
-            What do you wish them never to forget?
+            {getQuestion()}
           </motion.p>
 
           {/* Message */}
@@ -126,19 +149,15 @@ const FinalMemoryPage = () => {
           </motion.div>
         </div>
 
-        {/* New memory button */}
-        <motion.button
+        {/* Loading indicator */}
+        <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={handleNewMemory}
-          className="memora-btn w-full mt-8"
-          data-testid="new-memory-button"
+          className="text-center text-stone-500 mt-6"
         >
-          Leave another memory
-        </motion.button>
+          Saving your memory...
+        </motion.p>
       </motion.div>
     </div>
   );
