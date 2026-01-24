@@ -236,16 +236,23 @@ def main():
     success, memory_response = tester.test_create_memory()
     memory_id = memory_response.get('id') if success else None
     
+    # Test memory with tone
+    success_tone, memory_tone_response = tester.test_create_memory_with_tone()
+    memory_tone_id = memory_tone_response.get('id') if success_tone else None
+    
     tester.test_get_memories()
     
     print("\n📋 Testing Admin Operations...")
     tester.test_update_settings()
+    tester.test_tone_settings()
     tester.test_pdf_download()
     
-    # Clean up - delete test memory if created
+    # Clean up - delete test memories if created
     if memory_id:
         print("\n🧹 Cleaning up test data...")
         tester.test_delete_memory(memory_id)
+    if memory_tone_id:
+        tester.test_delete_memory(memory_tone_id)
     
     # Print final results
     print("\n" + "=" * 50)
