@@ -158,6 +158,49 @@ class MemoraAPITester:
             data=settings_data
         )
 
+    def test_tone_settings(self):
+        """Test tone page settings"""
+        # Test enabling/disabling tone page
+        tone_settings = {
+            "tone_page_enabled": False
+        }
+        success1, _ = self.run_test(
+            "Disable Tone Page",
+            "PUT",
+            "admin/settings",
+            200,
+            data=tone_settings
+        )
+        
+        # Test updating tone questions
+        tone_questions = {
+            "tone_questions": {
+                "wise": "What wisdom would you share with them?",
+                "funny": "What's a funny memory or joke for them?",
+                "advice": "What advice would you give them?",
+                "emotional": "What heartfelt message do you have for them?"
+            }
+        }
+        success2, _ = self.run_test(
+            "Update Tone Questions",
+            "PUT",
+            "admin/settings",
+            200,
+            data=tone_questions
+        )
+        
+        # Re-enable tone page
+        tone_settings["tone_page_enabled"] = True
+        success3, _ = self.run_test(
+            "Enable Tone Page",
+            "PUT",
+            "admin/settings",
+            200,
+            data=tone_settings
+        )
+        
+        return success1 and success2 and success3
+
     def test_pdf_download(self):
         """Test PDF download endpoint"""
         success, _ = self.run_test("Download PDF", "GET", "memories/pdf", 200)
