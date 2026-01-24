@@ -43,12 +43,21 @@ class Settings(BaseModel):
     welcome_text: str = "Leave a memory for"
     background_image: Optional[str] = None
     admin_password: str = "memora2024"
+    tone_page_enabled: bool = True
+    tone_questions: dict = {
+        "wise": "What wisdom would you share with them?",
+        "funny": "What's a funny memory or joke for them?",
+        "advice": "What advice would you give them?",
+        "emotional": "What heartfelt message do you have for them?"
+    }
 
 class SettingsUpdate(BaseModel):
     couple_names: Optional[str] = None
     welcome_text: Optional[str] = None
     background_image: Optional[str] = None
     admin_password: Optional[str] = None
+    tone_page_enabled: Optional[bool] = None
+    tone_questions: Optional[dict] = None
 
 class Memory(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -56,12 +65,14 @@ class Memory(BaseModel):
     guest_name: str
     photo: Optional[str] = None
     message: str
+    tone: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class MemoryCreate(BaseModel):
     guest_name: str
     photo: Optional[str] = None
     message: str
+    tone: Optional[str] = None
 
 class AdminLogin(BaseModel):
     password: str
