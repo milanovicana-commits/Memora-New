@@ -80,9 +80,15 @@ class AdminLogin(BaseModel):
 # Initialize settings if not exists
 async def init_settings():
     settings = await db.settings.find_one({}, {"_id": 0})
+    default_settings = Settings().model_dump()
     if not settings:
-        default_settings = Settings().model_dump()
         await db.settings.insert_one(default_settings)
+        return default_settings
+    # Merge with defaults to add any new fields
+    for key, value in default_settings.items():
+        if key not in settings:
+            settings[key] = value
+            await db.settings.update_one({}, {"$set": {key: value}})
     return settings
 
 @app.on_event("startup")
