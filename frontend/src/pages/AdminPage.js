@@ -1,10 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Upload, Download, Trash2, Lock, Image, Users, FileText, Eye, X } from 'lucide-react';
+import { ArrowLeft, Upload, Download, Trash2, Lock, Image, Users, FileText, Eye, X, MessageSquare, ToggleLeft, ToggleRight } from 'lucide-react';
 import { useMemora } from '../context/MemoraContext';
 import axios from 'axios';
 import { Toaster, toast } from 'sonner';
+
+const toneLabels = {
+  wise: 'Wise',
+  funny: 'Funny',
+  advice: 'Advice',
+  emotional: 'Emotional'
+};
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -14,7 +21,9 @@ const AdminPage = () => {
   const [memories, setMemories] = useState([]);
   const [localSettings, setLocalSettings] = useState({
     couple_names: '',
-    welcome_text: ''
+    welcome_text: '',
+    tone_page_enabled: true,
+    tone_questions: {}
   });
   const [isUploading, setIsUploading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -26,7 +35,14 @@ const AdminPage = () => {
       fetchMemories();
       setLocalSettings({
         couple_names: settings.couple_names || '',
-        welcome_text: settings.welcome_text || ''
+        welcome_text: settings.welcome_text || '',
+        tone_page_enabled: settings.tone_page_enabled !== false,
+        tone_questions: settings.tone_questions || {
+          wise: "What wisdom would you share with them?",
+          funny: "What's a funny memory or joke for them?",
+          advice: "What advice would you give them?",
+          emotional: "What heartfelt message do you have for them?"
+        }
       });
     }
   }, [isAdmin, settings]);
@@ -55,6 +71,28 @@ const AdminPage = () => {
     } catch (error) {
       toast.error('Failed to update settings');
     }
+  };
+
+  const handleToneToggle = async () => {
+    const newValue = !localSettings.tone_page_enabled;
+    setLocalSettings({ ...localSettings, tone_page_enabled: newValue });
+    try {
+      await updateSettings({ tone_page_enabled: newValue });
+      toast.success(`Tone selection page ${newValue ? 'enabled' : 'disabled'}`);
+    } catch (error) {
+      toast.error('Failed to update setting');
+      setLocalSettings({ ...localSettings, tone_page_enabled: !newValue });
+    }
+  };
+
+  const handleQuestionChange = (toneId, value) => {
+    setLocalSettings({
+      ...localSettings,
+      tone_questions: {
+        ...localSettings.tone_questions,
+        [toneId]: value
+      }
+    });
   };
 
   const handleBackgroundUpload = async (e) => {
@@ -210,6 +248,9 @@ const AdminPage = () => {
                 />
               )}
               <h4 className="font-serif text-xl text-center mb-2">{previewMemory.guest_name}</h4>
+              {previewMemory.tone && (
+                <p className="text-stone-500 text-sm text-center mb-2">Tone: {toneLabels[previewMemory.tone] || previewMemory.tone}</p>
+              )}
               <p className="text-stone-600 text-center">{previewMemory.message}</p>
             </div>
           </motion.div>
@@ -273,6 +314,61 @@ const AdminPage = () => {
                 data-testid="save-settings-button"
               >
                 Save Settings
+              </button>
+            </div>
+          </div>
+
+          {/* Tone Selection Settings */}
+          <div className="glass-card rounded-2xl p-6 mb-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <MessageSquare className="w-5 h-5 text-stone-600" />
+                <h2 className="font-serif text-xl text-stone-800">Tone Selection Page</h2>
+              </div>
+              <button
+                onClick={handleToneToggle}
+                className="flex items-center gap-2 text-stone-600 hover:text-stone-800"
+                data-testid="tone-toggle"
+              >
+                {localSettings.tone_page_enabled ? (
+                  <>
+                    <ToggleRight className="w-8 h-8 text-green-600" />
+                    <span className="text-green-600 text-sm">Enabled</span>
+                  </>
+                ) : (
+                  <>
+                    <ToggleLeft className="w-8 h-8 text-stone-400" />
+                    <span className="text-stone-400 text-sm">Disabled</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            <p className="text-stone-500 text-sm mb-4">
+              Customize the question shown for each tone category
+            </p>
+
+            <div className="space-y-4">
+              {Object.entries(toneLabels).map(([toneId, label]) => (
+                <div key={toneId}>
+                  <label className="block text-stone-600 mb-2 text-sm">{label} Question</label>
+                  <input
+                    type="text"
+                    value={localSettings.tone_questions?.[toneId] || ''}
+                    onChange={(e) => handleQuestionChange(toneId, e.target.value)}
+                    className="memora-input text-left text-sm"
+                    placeholder={`Question for ${label} tone...`}
+                    data-testid={`tone-question-${toneId}`}
+                  />
+                </div>
+              ))}
+
+              <button
+                onClick={handleSettingsUpdate}
+                className="memora-btn memora-btn-primary"
+                data-testid="save-tone-settings-button"
+              >
+                Save Tone Questions
               </button>
             </div>
           </div>
@@ -378,6 +474,11 @@ const AdminPage = () => {
                     <div className="flex-1 min-w-0">
                       <h3 className="font-serif text-lg text-stone-800">{memory.guest_name}</h3>
                       <p className="text-stone-500 text-sm truncate">{memory.message}</p>
+                      {memory.tone && (
+                        <span className="inline-block mt-1 px-2 py-0.5 bg-stone-100 rounded text-xs text-stone-600">
+                          {toneLabels[memory.tone] || memory.tone}
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex gap-2">
