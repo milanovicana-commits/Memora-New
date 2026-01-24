@@ -118,14 +118,14 @@ const PhotoCapturePage = () => {
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
     }
-    navigate('/message');
+    navigate('/tone');
   };
 
   const skipPhoto = () => {
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
     }
-    navigate('/message');
+    navigate('/tone');
   };
 
   return (
