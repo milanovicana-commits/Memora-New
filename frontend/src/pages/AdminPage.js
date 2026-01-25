@@ -13,6 +13,37 @@ const toneLabels = {
   emotional: 'Emotional'
 };
 
+const defaultQuestions = {
+  wise: [
+    "What wisdom would you share with them?",
+    "What life lesson do you hope they remember?",
+    "What truth about love would you tell them?",
+    "What would you want them to never forget?",
+    "What wise words would you give to them?"
+  ],
+  funny: [
+    "What's a funny memory or joke for them?",
+    "What always makes you laugh about them?",
+    "What's the funniest thing you remember?",
+    "What would make them smile today?",
+    "What's your most hilarious memory together?"
+  ],
+  advice: [
+    "What advice would you give them?",
+    "What tip would help their journey?",
+    "What suggestion do you have for them?",
+    "What would you recommend they do?",
+    "What guidance would you share?"
+  ],
+  emotional: [
+    "What heartfelt message do you have for them?",
+    "What touches your heart about them?",
+    "What do you love most about them?",
+    "What makes them special to you?",
+    "What would you want them to feel?"
+  ]
+};
+
 const AdminPage = () => {
   const navigate = useNavigate();
   const { isAdmin, adminLogin, settings, updateSettings, API, fetchSettings } = useMemora();
@@ -28,21 +59,32 @@ const AdminPage = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [previewMemory, setPreviewMemory] = useState(null);
+  const [expandedTone, setExpandedTone] = useState(null);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (isAdmin) {
       fetchMemories();
+      // Initialize tone_questions with arrays of 5 questions each
+      const toneQuestions = {};
+      Object.keys(toneLabels).forEach(toneId => {
+        const existing = settings.tone_questions?.[toneId];
+        if (Array.isArray(existing)) {
+          // Ensure we have 5 slots
+          toneQuestions[toneId] = [...existing, '', '', '', '', ''].slice(0, 5);
+        } else if (typeof existing === 'string') {
+          // Convert old single string format to array
+          toneQuestions[toneId] = [existing, '', '', '', ''];
+        } else {
+          toneQuestions[toneId] = defaultQuestions[toneId] || ['', '', '', '', ''];
+        }
+      });
+      
       setLocalSettings({
         couple_names: settings.couple_names || '',
         welcome_text: settings.welcome_text || '',
         tone_page_enabled: settings.tone_page_enabled !== false,
-        tone_questions: settings.tone_questions || {
-          wise: "What wisdom would you share with them?",
-          funny: "What's a funny memory or joke for them?",
-          advice: "What advice would you give them?",
-          emotional: "What heartfelt message do you have for them?"
-        }
+        tone_questions: toneQuestions
       });
     }
   }, [isAdmin, settings]);
@@ -66,7 +108,10 @@ const AdminPage = () => {
 
   const handleSettingsUpdate = async () => {
     try {
-      await updateSettings(localSettings);
+      await updateSettings({
+        couple_names: localSettings.couple_names,
+        welcome_text: localSettings.welcome_text
+      });
       toast.success('Settings updated successfully');
     } catch (error) {
       toast.error('Failed to update settings');
@@ -85,14 +130,25 @@ const AdminPage = () => {
     }
   };
 
-  const handleQuestionChange = (toneId, value) => {
+  const handleQuestionChange = (toneId, index, value) => {
+    const newQuestions = [...(localSettings.tone_questions[toneId] || ['', '', '', '', ''])];
+    newQuestions[index] = value;
     setLocalSettings({
       ...localSettings,
       tone_questions: {
         ...localSettings.tone_questions,
-        [toneId]: value
+        [toneId]: newQuestions
       }
     });
+  };
+
+  const handleSaveToneQuestions = async () => {
+    try {
+      await updateSettings({ tone_questions: localSettings.tone_questions });
+      toast.success('Questions updated successfully');
+    } catch (error) {
+      toast.error('Failed to update questions');
+    }
   };
 
   const handleBackgroundUpload = async (e) => {
@@ -345,30 +401,47 @@ const AdminPage = () => {
             </div>
 
             <p className="text-stone-500 text-sm mb-4">
-              Customize the question shown for each tone category
+              Edit up to 5 questions per tone. A random question will be shown to guests.
             </p>
 
             <div className="space-y-4">
               {Object.entries(toneLabels).map(([toneId, label]) => (
-                <div key={toneId}>
-                  <label className="block text-stone-600 mb-2 text-sm">{label} Question</label>
-                  <input
-                    type="text"
-                    value={localSettings.tone_questions?.[toneId] || ''}
-                    onChange={(e) => handleQuestionChange(toneId, e.target.value)}
-                    className="memora-input text-left text-sm"
-                    placeholder={`Question for ${label} tone...`}
-                    data-testid={`tone-question-${toneId}`}
-                  />
+                <div key={toneId} className="border border-stone-200 rounded-xl overflow-hidden">
+                  <button
+                    onClick={() => setExpandedTone(expandedTone === toneId ? null : toneId)}
+                    className="w-full p-4 flex items-center justify-between bg-stone-50 hover:bg-stone-100 transition-colors"
+                    data-testid={`tone-expand-${toneId}`}
+                  >
+                    <span className="font-serif text-lg text-stone-800">{label} Questions</span>
+                    <span className="text-stone-500">{expandedTone === toneId ? '−' : '+'}</span>
+                  </button>
+                  
+                  {expandedTone === toneId && (
+                    <div className="p-4 space-y-3 bg-white">
+                      {[0, 1, 2, 3, 4].map((index) => (
+                        <div key={index}>
+                          <label className="block text-stone-500 mb-1 text-xs">Question {index + 1}</label>
+                          <input
+                            type="text"
+                            value={localSettings.tone_questions?.[toneId]?.[index] || ''}
+                            onChange={(e) => handleQuestionChange(toneId, index, e.target.value)}
+                            className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:border-stone-400"
+                            placeholder={`Enter question ${index + 1}...`}
+                            data-testid={`tone-question-${toneId}-${index}`}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
 
               <button
-                onClick={handleSettingsUpdate}
+                onClick={handleSaveToneQuestions}
                 className="memora-btn memora-btn-primary"
                 data-testid="save-tone-settings-button"
               >
-                Save Tone Questions
+                Save All Questions
               </button>
             </div>
           </div>
