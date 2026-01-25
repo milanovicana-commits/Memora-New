@@ -6,7 +6,7 @@ import { User } from 'lucide-react';
 
 const FinalMemoryPage = () => {
   const navigate = useNavigate();
-  const { guestName, photo, message, selectedTone, settings, submitMemory, resetMemory } = useMemora();
+  const { guestName, photo, message, selectedTone, settings, submitMemory } = useMemora();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
@@ -23,10 +23,7 @@ const FinalMemoryPage = () => {
       submitMemory()
         .then(() => {
           setHasSubmitted(true);
-          // Navigate to thank you page after brief display
-          setTimeout(() => {
-            navigate('/thankyou');
-          }, 2000);
+          setIsSubmitting(false);
         })
         .catch((error) => {
           console.error('Error submitting memory:', error);
@@ -35,10 +32,22 @@ const FinalMemoryPage = () => {
     }
   }, [guestName, navigate, submitMemory, hasSubmitted, isSubmitting]);
 
+  const handleFinish = () => {
+    navigate('/thankyou');
+  };
+
   // Get the question based on selected tone
   const getQuestion = () => {
     if (selectedTone && settings.tone_questions && settings.tone_questions[selectedTone]) {
-      return settings.tone_questions[selectedTone];
+      const questions = settings.tone_questions[selectedTone];
+      if (Array.isArray(questions)) {
+        const validQuestions = questions.filter(q => q && q.trim());
+        if (validQuestions.length > 0) {
+          return validQuestions[0]; // Show first question on final page
+        }
+      } else if (typeof questions === 'string') {
+        return questions;
+      }
     }
     return "What do you wish them never to forget?";
   };
@@ -149,15 +158,20 @@ const FinalMemoryPage = () => {
           </motion.div>
         </div>
 
-        {/* Loading indicator */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+        {/* Finish button */}
+        <motion.button
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1 }}
-          className="text-center text-stone-500 mt-6"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={handleFinish}
+          disabled={isSubmitting}
+          className="memora-btn w-full mt-8 disabled:opacity-50"
+          data-testid="finish-button"
         >
-          Saving your memory...
-        </motion.p>
+          {isSubmitting ? 'Saving...' : 'Finish'}
+        </motion.button>
       </motion.div>
     </div>
   );

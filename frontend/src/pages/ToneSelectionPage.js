@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useMemora } from '../context/MemoraContext';
@@ -13,7 +13,6 @@ const toneOptions = [
 const ToneSelectionPage = () => {
   const navigate = useNavigate();
   const { guestName, settings, setSelectedTone } = useMemora();
-  const [selectedOption, setSelectedOption] = useState(null);
 
   // Redirect if no name entered or tone page disabled
   useEffect(() => {
@@ -25,14 +24,8 @@ const ToneSelectionPage = () => {
   }, [guestName, settings.tone_page_enabled, navigate]);
 
   const handleSelect = (toneId) => {
-    setSelectedOption(toneId);
-  };
-
-  const handleContinue = () => {
-    if (selectedOption) {
-      setSelectedTone(selectedOption);
-      navigate('/message');
-    }
+    setSelectedTone(toneId);
+    navigate('/message');
   };
 
   const backgroundImage = settings.background_image || 'https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80';
@@ -71,7 +64,7 @@ const ToneSelectionPage = () => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="grid grid-cols-2 gap-4 mb-8"
+          className="grid grid-cols-2 gap-4"
         >
           {toneOptions.map((tone, index) => (
             <motion.button
@@ -82,11 +75,7 @@ const ToneSelectionPage = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => handleSelect(tone.id)}
-              className={`glass-card rounded-2xl p-6 flex items-center gap-3 transition-all ${
-                selectedOption === tone.id 
-                  ? 'ring-2 ring-stone-800 bg-white/60' 
-                  : 'hover:bg-white/50'
-              }`}
+              className="glass-card rounded-2xl p-6 flex items-center gap-3 transition-all hover:bg-white/60 cursor-pointer"
               data-testid={`tone-${tone.id}`}
             >
               <span className="text-2xl">{tone.icon}</span>
@@ -94,21 +83,6 @@ const ToneSelectionPage = () => {
             </motion.button>
           ))}
         </motion.div>
-
-        {/* Continue button */}
-        <motion.button
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={handleContinue}
-          disabled={!selectedOption}
-          className="memora-btn w-full disabled:opacity-50 disabled:cursor-not-allowed"
-          data-testid="save-memory-button"
-        >
-          Save memory
-        </motion.button>
       </motion.div>
     </div>
   );

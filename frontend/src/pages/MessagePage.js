@@ -31,10 +31,20 @@ const MessagePage = () => {
     }
   };
 
-  // Get the question based on selected tone
+  // Get random question based on selected tone
   const getQuestion = () => {
     if (selectedTone && settings.tone_questions && settings.tone_questions[selectedTone]) {
-      return settings.tone_questions[selectedTone];
+      const questions = settings.tone_questions[selectedTone];
+      // If it's an array, pick a random one from non-empty questions
+      if (Array.isArray(questions)) {
+        const validQuestions = questions.filter(q => q && q.trim());
+        if (validQuestions.length > 0) {
+          const randomIndex = Math.floor(Math.random() * validQuestions.length);
+          return validQuestions[randomIndex];
+        }
+      } else if (typeof questions === 'string') {
+        return questions;
+      }
     }
     return "What do you wish them never to forget?";
   };
