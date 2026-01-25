@@ -45,10 +45,34 @@ class Settings(BaseModel):
     admin_password: str = "memora2024"
     tone_page_enabled: bool = True
     tone_questions: dict = {
-        "wise": "What wisdom would you share with them?",
-        "funny": "What's a funny memory or joke for them?",
-        "advice": "What advice would you give them?",
-        "emotional": "What heartfelt message do you have for them?"
+        "wise": [
+            "What wisdom would you share with them?",
+            "What life lesson do you hope they remember?",
+            "What truth about love would you tell them?",
+            "What would you want them to never forget?",
+            "What wise words would you give to them?"
+        ],
+        "funny": [
+            "What's a funny memory or joke for them?",
+            "What always makes you laugh about them?",
+            "What's the funniest thing you remember?",
+            "What would make them smile today?",
+            "What's your most hilarious memory together?"
+        ],
+        "advice": [
+            "What advice would you give them?",
+            "What tip would help their journey?",
+            "What suggestion do you have for them?",
+            "What would you recommend they do?",
+            "What guidance would you share?"
+        ],
+        "emotional": [
+            "What heartfelt message do you have for them?",
+            "What touches your heart about them?",
+            "What do you love most about them?",
+            "What makes them special to you?",
+            "What would you want them to feel?"
+        ]
     }
 
 class SettingsUpdate(BaseModel):
