@@ -24,13 +24,25 @@ Build a wedding memory app where guests can leave memories (name, photo, message
 - [x] PDF download of all memories
 
 ## What's Been Implemented (Dec 2025)
-- Full guest flow: Landing → Name → Photo → Message → Final Memory
-- Glass-morphism UI with elegant serif typography
+- Full guest flow: Landing → Name → Photo → Tone Selection → Message → Final Memory → Thank You
+- Glass-morphism UI with elegant serif typography (Playfair Display, Cormorant Garamond)
+- Custom M logo with crown design matching original branding
 - Camera integration with fallback to file upload
-- Admin panel with settings management
-- Background image upload
-- PDF generation with all memories
+- **Tone Selection Page**: 4 tones (Wise, Funny, Advice, Emotional) - click to proceed
+- **5 Questions per Tone**: Admin can edit up to 5 questions per category, random one shown
+- **Admin Toggle**: Enable/disable tone selection page
+- **Thank You Page**: Final confirmation with dove emoji and Close button
+- Admin panel with settings management, background upload, PDF download
 - Memory preview and deletion in admin
+
+## User Flow
+1. Landing Page (M logo, Begin button)
+2. Name Entry (enter name/nickname)
+3. Photo Capture (take/upload photo or skip)
+4. Tone Selection (choose Wise/Funny/Advice/Emotional - auto proceeds)
+5. Message Page (question based on tone, random from 5)
+6. Final Memory (preview page with Finish button)
+7. Thank You Page (confirmation with Close button)
 
 ## API Endpoints
 - GET /api/settings - Get app settings
