@@ -6,28 +6,40 @@ const MemoraContext = createContext();
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+const defaultToneQuestions = {
+  wise: ["What wisdom would you share with them?", "", "", "", "", "", "", "", "", ""],
+  funny: ["What's a funny memory or joke for them?", "", "", "", "", "", "", "", "", ""],
+  advice: ["What advice would you give them?", "", "", "", "", "", "", "", "", ""],
+  emotional: ["What heartfelt message do you have for them?", "", "", "", "", "", "", "", "", ""]
+};
+
 export const MemoraProvider = ({ children }) => {
   const [guestName, setGuestName] = useState('');
   const [photo, setPhoto] = useState(null);
   const [message, setMessage] = useState('');
   const [selectedTone, setSelectedTone] = useState(null);
+  const [currentEvent, setCurrentEvent] = useState(null);
+  const [eventCode, setEventCode] = useState(null);
   const [settings, setSettings] = useState({
     couple_names: 'Anna & Nemanja',
     welcome_text: 'Leave a memory for',
     background_image: null,
     tone_page_enabled: true,
-    tone_questions: {
-      wise: "What wisdom would you share with them?",
-      funny: "What's a funny memory or joke for them?",
-      advice: "What advice would you give them?",
-      emotional: "What heartfelt message do you have for them?"
-    }
+    tone_questions: defaultToneQuestions
   });
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchSettings();
+    // Check if we have an event code in URL
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('event');
+    if (code) {
+      setEventCode(code);
+      fetchEventByCode(code);
+    } else {
+      fetchSettings();
+    }
   }, []);
 
   const fetchSettings = async () => {
@@ -41,11 +53,40 @@ export const MemoraProvider = ({ children }) => {
     }
   };
 
+  const fetchEventByCode = async (code) => {
+    try {
+      const response = await axios.get(`${API}/events/code/${code}`);
+      setCurrentEvent(response.data);
+      // Use event settings
+      setSettings(prev => ({
+        ...prev,
+        couple_names: response.data.couple_names,
+        welcome_text: response.data.welcome_text || prev.welcome_text,
+        background_image: response.data.background_image,
+        tone_page_enabled: response.data.tone_page_enabled !== false,
+        tone_questions: response.data.tone_questions || defaultToneQuestions
+      }));
+    } catch (error) {
+      console.error('Error fetching event:', error);
+      // Event not found or expired
+      setCurrentEvent(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const updateSettings = async (newSettings) => {
     try {
-      const response = await axios.put(`${API}/admin/settings`, newSettings);
-      setSettings(prev => ({ ...prev, ...response.data }));
-      return response.data;
+      if (currentEvent) {
+        const response = await axios.put(`${API}/events/${currentEvent.id}`, newSettings);
+        setCurrentEvent(response.data);
+        setSettings(prev => ({ ...prev, ...response.data }));
+        return response.data;
+      } else {
+        const response = await axios.put(`${API}/admin/settings`, newSettings);
+        setSettings(prev => ({ ...prev, ...response.data }));
+        return response.data;
+      }
     } catch (error) {
       console.error('Error updating settings:', error);
       throw error;
@@ -68,6 +109,7 @@ export const MemoraProvider = ({ children }) => {
   const submitMemory = async () => {
     try {
       const response = await axios.post(`${API}/memories`, {
+        event_code: eventCode || null,
         guest_name: guestName,
         photo: photo,
         message: message,
@@ -96,9 +138,14 @@ export const MemoraProvider = ({ children }) => {
     setMessage,
     selectedTone,
     setSelectedTone,
+    currentEvent,
+    setCurrentEvent,
+    eventCode,
+    setEventCode,
     settings,
     setSettings,
     fetchSettings,
+    fetchEventByCode,
     updateSettings,
     isAdmin,
     setIsAdmin,
