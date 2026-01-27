@@ -1,12 +1,12 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Camera, RotateCcw, Check, Upload } from 'lucide-react';
+import { Camera, RotateCcw, Check, Upload, ChevronRight } from 'lucide-react';
 import { useMemora } from '../context/MemoraContext';
 
 const PhotoCapturePage = () => {
   const navigate = useNavigate();
-  const { setPhoto, guestName } = useMemora();
+  const { setPhoto, guestName, settings } = useMemora();
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -14,6 +14,7 @@ const PhotoCapturePage = () => {
   const [capturedPhoto, setCapturedPhoto] = useState(null);
   const [cameraError, setCameraError] = useState(false);
   const [facingMode, setFacingMode] = useState('user');
+  const [photoConfirmed, setPhotoConfirmed] = useState(false);
 
   // Redirect if no name entered
   useEffect(() => {
@@ -94,6 +95,7 @@ const PhotoCapturePage = () => {
       
       const photoData = canvas.toDataURL('image/jpeg', 0.8);
       setCapturedPhoto(photoData);
+      setPhotoConfirmed(false);
     }
   };
 
@@ -103,6 +105,7 @@ const PhotoCapturePage = () => {
       const reader = new FileReader();
       reader.onload = (event) => {
         setCapturedPhoto(event.target.result);
+        setPhotoConfirmed(false);
       };
       reader.readAsDataURL(file);
     }
@@ -110,14 +113,19 @@ const PhotoCapturePage = () => {
 
   const retake = () => {
     setCapturedPhoto(null);
+    setPhotoConfirmed(false);
     startCamera();
   };
 
   const confirmPhoto = () => {
     setPhoto(capturedPhoto);
+    setPhotoConfirmed(true);
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
     }
+  };
+
+  const goToNext = () => {
     navigate('/tone');
   };
 
@@ -217,24 +225,37 @@ const PhotoCapturePage = () => {
           className="flex items-center justify-center gap-6 mt-8"
         >
           {capturedPhoto ? (
-            <>
+            photoConfirmed ? (
+              /* Photo confirmed - show Next button */
               <button
-                onClick={retake}
-                className="p-4 rounded-full bg-white/80 backdrop-blur-sm shadow-sm hover:bg-white transition-all"
-                data-testid="retake-button"
-                aria-label="Retake photo"
+                onClick={goToNext}
+                className="memora-btn memora-btn-primary flex items-center gap-2 px-8"
+                data-testid="next-button"
               >
-                <RotateCcw className="w-6 h-6 text-stone-700" />
+                Next
+                <ChevronRight className="w-5 h-5" />
               </button>
-              <button
-                onClick={confirmPhoto}
-                className="capture-btn flex items-center justify-center bg-stone-900"
-                data-testid="confirm-button"
-                aria-label="Confirm photo"
-              >
-                <Check className="w-8 h-8 text-white" />
-              </button>
-            </>
+            ) : (
+              /* Photo taken but not confirmed - show retake and confirm */
+              <>
+                <button
+                  onClick={retake}
+                  className="p-4 rounded-full bg-white/80 backdrop-blur-sm shadow-sm hover:bg-white transition-all"
+                  data-testid="retake-button"
+                  aria-label="Retake photo"
+                >
+                  <RotateCcw className="w-6 h-6 text-stone-700" />
+                </button>
+                <button
+                  onClick={confirmPhoto}
+                  className="capture-btn flex items-center justify-center bg-stone-900"
+                  data-testid="confirm-button"
+                  aria-label="Confirm photo"
+                >
+                  <Check className="w-8 h-8 text-white" />
+                </button>
+              </>
+            )
           ) : (
             <>
               {!cameraError && (
@@ -267,8 +288,8 @@ const PhotoCapturePage = () => {
           )}
         </motion.div>
 
-        {/* Skip option */}
-        {!capturedPhoto && (
+        {/* Skip option - only show when no photo taken or not confirmed */}
+        {(!capturedPhoto || !photoConfirmed) && (
           <motion.button
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
