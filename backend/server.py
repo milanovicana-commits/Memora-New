@@ -21,6 +21,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 import tempfile
 import urllib.request
+import random
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -50,30 +51,52 @@ class Settings(BaseModel):
             "What life lesson do you hope they remember?",
             "What truth about love would you tell them?",
             "What would you want them to never forget?",
-            "What wise words would you give to them?"
+            "What wise words would you give to them?",
+            "", "", "", "", ""
         ],
         "funny": [
             "What's a funny memory or joke for them?",
             "What always makes you laugh about them?",
             "What's the funniest thing you remember?",
             "What would make them smile today?",
-            "What's your most hilarious memory together?"
+            "What's your most hilarious memory together?",
+            "", "", "", "", ""
         ],
         "advice": [
             "What advice would you give them?",
             "What tip would help their journey?",
             "What suggestion do you have for them?",
             "What would you recommend they do?",
-            "What guidance would you share?"
+            "What guidance would you share?",
+            "", "", "", "", ""
         ],
         "emotional": [
             "What heartfelt message do you have for them?",
             "What touches your heart about them?",
             "What do you love most about them?",
             "What makes them special to you?",
-            "What would you want them to feel?"
+            "What would you want them to feel?",
+            "", "", "", "", ""
         ]
     }
+
+class Event(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    code: str = Field(default_factory=lambda: ''.join(random.choices('ABCDEFGHJKLMNPQRSTUVWXYZ23456789', k=6)))
+    name: str
+    couple_names: str
+    welcome_text: str = "Leave a memory for"
+    background_image: Optional[str] = None
+    tone_page_enabled: bool = True
+    tone_questions: Optional[dict] = None
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class EventCreate(BaseModel):
+    name: str
+    couple_names: str
+    welcome_text: str = "Leave a memory for"
 
 class SettingsUpdate(BaseModel):
     couple_names: Optional[str] = None
@@ -86,6 +109,7 @@ class SettingsUpdate(BaseModel):
 class Memory(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    event_id: Optional[str] = None
     guest_name: str
     photo: Optional[str] = None
     message: str
@@ -93,6 +117,7 @@ class Memory(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class MemoryCreate(BaseModel):
+    event_code: Optional[str] = None
     guest_name: str
     photo: Optional[str] = None
     message: str
