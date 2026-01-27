@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useMemora } from '../context/MemoraContext';
@@ -13,22 +13,31 @@ const toneOptions = [
 const ToneSelectionPage = () => {
   const navigate = useNavigate();
   const { guestName, settings, setSelectedTone } = useMemora();
+  const [hasCheckedRedirect, setHasCheckedRedirect] = useState(false);
 
-  // Redirect if no name entered or tone page disabled
+  // Check redirects only once on mount
   useEffect(() => {
-    if (!guestName) {
-      navigate('/name');
-    } else if (!settings.tone_page_enabled) {
-      navigate('/message');
+    if (!hasCheckedRedirect) {
+      setHasCheckedRedirect(true);
+      if (!guestName) {
+        navigate('/name');
+      } else if (settings.tone_page_enabled === false) {
+        navigate('/message');
+      }
     }
-  }, [guestName, settings.tone_page_enabled, navigate]);
+  }, [guestName, settings.tone_page_enabled, navigate, hasCheckedRedirect]);
 
-  const handleSelect = (toneId) => {
+  const handleToneClick = (toneId) => {
     setSelectedTone(toneId);
     navigate('/message');
   };
 
   const backgroundImage = settings.background_image || 'https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80';
+
+  // Don't render if we need to redirect
+  if (!guestName || settings.tone_page_enabled === false) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
@@ -74,7 +83,7 @@ const ToneSelectionPage = () => {
               transition={{ delay: 0.3 + index * 0.1 }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => handleSelect(tone.id)}
+              onClick={() => handleToneClick(tone.id)}
               className="glass-card rounded-2xl p-6 flex items-center gap-3 transition-all hover:bg-white/60 cursor-pointer"
               data-testid={`tone-${tone.id}`}
             >
