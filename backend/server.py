@@ -376,7 +376,18 @@ async def download_event_memories_pdf(event_id: str):
 
 @api_router.post("/memories", response_model=Memory, status_code=201)
 async def create_memory(memory: MemoryCreate):
-    memory_obj = Memory(**memory.model_dump())
+    event_id = None
+    if memory.event_code:
+        event = await db.events.find_one({"code": memory.event_code.upper(), "is_active": True})
+        if not event:
+            raise HTTPException(status_code=404, detail="Event not found or expired")
+        event_id = event['id']
+    
+    memory_data = memory.model_dump()
+    memory_data.pop('event_code', None)
+    memory_data['event_id'] = event_id
+    
+    memory_obj = Memory(**memory_data)
     doc = memory_obj.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
     await db.memories.insert_one(doc)
