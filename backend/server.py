@@ -175,13 +175,204 @@ async def update_settings(update: SettingsUpdate):
     return settings
 
 @api_router.post("/admin/background")
-async def upload_background(file: UploadFile = File(...)):
+async def upload_background(file: UploadFile = File(...), event_id: Optional[str] = Form(None)):
     contents = await file.read()
     base64_image = base64.b64encode(contents).decode('utf-8')
     content_type = file.content_type or 'image/jpeg'
     data_url = f"data:{content_type};base64,{base64_image}"
-    await db.settings.update_one({}, {"$set": {"background_image": data_url}}, upsert=True)
+    
+    if event_id:
+        await db.events.update_one({"id": event_id}, {"$set": {"background_image": data_url}})
+    else:
+        await db.settings.update_one({}, {"$set": {"background_image": data_url}}, upsert=True)
     return {"success": True, "background_image": data_url}
+
+# Event Management Routes
+@api_router.post("/events", status_code=201)
+async def create_event(event: EventCreate):
+    # Generate unique code
+    code = ''.join(random.choices('ABCDEFGHJKLMNPQRSTUVWXYZ23456789', k=6))
+    # Ensure code is unique
+    while await db.events.find_one({"code": code, "is_active": True}):
+        code = ''.join(random.choices('ABCDEFGHJKLMNPQRSTUVWXYZ23456789', k=6))
+    
+    default_settings = Settings()
+    event_obj = Event(
+        code=code,
+        name=event.name,
+        couple_names=event.couple_names,
+        welcome_text=event.welcome_text,
+        tone_questions=default_settings.tone_questions
+    )
+    doc = event_obj.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    await db.events.insert_one(doc)
+    return {"id": event_obj.id, "code": event_obj.code, "name": event_obj.name, "couple_names": event_obj.couple_names}
+
+@api_router.get("/events")
+async def get_events():
+    events = await db.events.find({"is_active": True}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    for event in events:
+        if isinstance(event.get('created_at'), str):
+            event['created_at'] = datetime.fromisoformat(event['created_at'])
+        # Count memories for this event
+        memory_count = await db.memories.count_documents({"event_id": event['id']})
+        event['memory_count'] = memory_count
+    return events
+
+@api_router.get("/events/{event_id}")
+async def get_event(event_id: str):
+    event = await db.events.find_one({"id": event_id, "is_active": True}, {"_id": 0})
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    return event
+
+@api_router.get("/events/code/{code}")
+async def get_event_by_code(code: str):
+    event = await db.events.find_one({"code": code.upper(), "is_active": True}, {"_id": 0})
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found or expired")
+    return event
+
+@api_router.put("/events/{event_id}")
+async def update_event(event_id: str, update: SettingsUpdate):
+    update_data = {k: v for k, v in update.model_dump().items() if v is not None}
+    if update_data:
+        await db.events.update_one({"id": event_id}, {"$set": update_data})
+    event = await db.events.find_one({"id": event_id}, {"_id": 0})
+    return event
+
+@api_router.delete("/events/{event_id}")
+async def deactivate_event(event_id: str):
+    result = await db.events.update_one({"id": event_id}, {"$set": {"is_active": False}})
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Event not found")
+    return {"success": True}
+
+@api_router.get("/events/{event_id}/memories")
+async def get_event_memories(event_id: str):
+    memories = await db.memories.find({"event_id": event_id}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    for memory in memories:
+        if isinstance(memory.get('created_at'), str):
+            memory['created_at'] = datetime.fromisoformat(memory['created_at'])
+    return memories
+
+@api_router.get("/events/{event_id}/pdf")
+async def download_event_memories_pdf(event_id: str):
+    event = await db.events.find_one({"id": event_id}, {"_id": 0})
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    
+    memories = await db.memories.find({"event_id": event_id}, {"_id": 0}).sort("created_at", 1).to_list(1000)
+    
+    buffer = BytesIO()
+    width, height = A4
+    c = canvas.Canvas(buffer, pagesize=A4)
+    
+    for i, memory in enumerate(memories):
+        # Draw decorative border
+        c.setStrokeColorRGB(0.9, 0.89, 0.88)
+        c.setLineWidth(2)
+        margin = 0.5 * inch
+        c.rect(margin, margin, width - 2*margin, height - 2*margin)
+        
+        # Draw inner border
+        c.setLineWidth(0.5)
+        inner_margin = 0.7 * inch
+        c.rect(inner_margin, inner_margin, width - 2*inner_margin, height - 2*inner_margin)
+        
+        # Title
+        c.setFillColorRGB(0.11, 0.1, 0.09)
+        c.setFont("Helvetica-Bold", 24)
+        title = "This is your page in"
+        title_width = c.stringWidth(title, "Helvetica-Bold", 24)
+        c.drawString((width - title_width) / 2, height - 1.5*inch, title)
+        
+        c.setFont("Helvetica-Bold", 24)
+        subtitle = "their book of memories."
+        subtitle_width = c.stringWidth(subtitle, "Helvetica-Bold", 24)
+        c.drawString((width - subtitle_width) / 2, height - 2*inch, subtitle)
+        
+        # Photo - LARGER SIZE
+        if memory.get('photo'):
+            try:
+                photo_data = memory['photo']
+                if photo_data.startswith('data:'):
+                    photo_data = photo_data.split(',')[1]
+                img_bytes = base64.b64decode(photo_data)
+                img = Image.open(BytesIO(img_bytes))
+                
+                img_width = 3 * inch
+                img_height = 3 * inch
+                img_x = (width - img_width) / 2
+                img_y = height - 5.5 * inch
+                
+                with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as tmp:
+                    img.save(tmp.name, 'PNG')
+                    c.drawImage(tmp.name, img_x, img_y, width=img_width, height=img_height, preserveAspectRatio=True, mask='auto')
+                    os.unlink(tmp.name)
+            except Exception as e:
+                logging.error(f"Error adding photo: {e}")
+        
+        # Guest name - BIGGER
+        c.setFillColorRGB(0.11, 0.1, 0.09)
+        c.setFont("Helvetica-Bold", 26)
+        name = memory.get('guest_name', 'Guest')
+        name_width = c.stringWidth(name, "Helvetica-Bold", 26)
+        c.drawString((width - name_width) / 2, height - 6.2*inch, name)
+        
+        # Question - BIGGER
+        c.setFont("Helvetica-Oblique", 16)
+        question = "What do you wish them never to forget?"
+        question_width = c.stringWidth(question, "Helvetica-Oblique", 16)
+        c.drawString((width - question_width) / 2, height - 6.8*inch, question)
+        
+        # Message box
+        c.setFillColorRGB(0.96, 0.96, 0.95)
+        box_width = 5.5 * inch
+        box_height = 2.8 * inch
+        box_x = (width - box_width) / 2
+        box_y = height - 10 * inch
+        c.roundRect(box_x, box_y, box_width, box_height, 10, fill=1, stroke=0)
+        
+        # Message text - BIGGER
+        c.setFillColorRGB(0.11, 0.1, 0.09)
+        c.setFont("Helvetica", 14)
+        message = memory.get('message', '')
+        
+        words = message.split()
+        lines = []
+        current_line = ""
+        for word in words:
+            test_line = f"{current_line} {word}".strip()
+            if c.stringWidth(test_line, "Helvetica", 14) < box_width - 40:
+                current_line = test_line
+            else:
+                if current_line:
+                    lines.append(current_line)
+                current_line = word
+        if current_line:
+            lines.append(current_line)
+        
+        y_offset = box_y + box_height - 35
+        for line in lines[:10]:
+            c.drawString(box_x + 25, y_offset, line)
+            y_offset -= 22
+        
+        if i < len(memories) - 1:
+            c.showPage()
+    
+    c.save()
+    buffer.seek(0)
+    
+    couple_names = event.get('couple_names', 'Memories')
+    filename = f"memora_{couple_names.replace(' ', '_').replace('&', 'and')}.pdf"
+    
+    return StreamingResponse(
+        buffer,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
 
 @api_router.post("/memories", response_model=Memory, status_code=201)
 async def create_memory(memory: MemoryCreate):
