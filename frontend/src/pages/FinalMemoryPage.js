@@ -43,7 +43,7 @@ const FinalMemoryPage = () => {
       if (Array.isArray(questions)) {
         const validQuestions = questions.filter(q => q && q.trim());
         if (validQuestions.length > 0) {
-          return validQuestions[0]; // Show first question on final page
+          return validQuestions[0];
         }
       } else if (typeof questions === 'string') {
         return questions;
@@ -62,95 +62,95 @@ const FinalMemoryPage = () => {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8 }}
-        className="z-10 w-full max-w-md px-6"
+        className="z-10 w-full max-w-lg px-6"
       >
-        {/* Memory frame */}
-        <div className="memory-frame memory-frame-bottom bg-[#FDFCF8] rounded-sm">
-          {/* Title */}
+        {/* Memory frame - larger */}
+        <div className="memory-frame memory-frame-bottom bg-[#FDFCF8] rounded-sm p-8 md:p-10">
+          {/* Title - bigger */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="text-center mb-8"
+            className="text-center mb-10"
           >
-            <h1 className="font-serif text-xl md:text-2xl text-stone-800 italic" data-testid="page-title">
+            <h1 className="font-serif text-2xl md:text-3xl text-stone-800 italic leading-relaxed" data-testid="page-title">
               This is your page in<br />their book of memories.
             </h1>
           </motion.div>
 
           {/* Decorative line */}
-          <div className="flex items-center justify-center gap-4 mb-6">
-            <div className="h-px w-12 bg-stone-300" />
-            <div className="w-2 h-2 border border-stone-300 rotate-45" />
-            <div className="h-px w-12 bg-stone-300" />
+          <div className="flex items-center justify-center gap-4 mb-8">
+            <div className="h-px w-16 bg-stone-300" />
+            <div className="w-3 h-3 border border-stone-300 rotate-45" />
+            <div className="h-px w-16 bg-stone-300" />
           </div>
 
-          {/* Photo */}
+          {/* Photo - MUCH LARGER */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="flex justify-center mb-4"
+            className="flex justify-center mb-6"
           >
             <div className="relative">
               {/* Decorative frame around photo */}
-              <div className="absolute -inset-2 border border-stone-200" />
-              <div className="absolute -inset-3 border border-stone-100" />
+              <div className="absolute -inset-3 border border-stone-200" />
+              <div className="absolute -inset-4 border border-stone-100" />
               
               {photo ? (
                 <img 
                   src={photo} 
                   alt={guestName}
-                  className="w-32 h-32 object-cover"
+                  className="w-48 h-48 md:w-56 md:h-56 object-cover"
                   data-testid="memory-photo"
                 />
               ) : (
                 <div 
-                  className="w-32 h-32 bg-stone-100 flex items-center justify-center"
+                  className="w-48 h-48 md:w-56 md:h-56 bg-stone-100 flex items-center justify-center"
                   data-testid="memory-photo-placeholder"
                 >
-                  <User className="w-12 h-12 text-stone-400" />
+                  <User className="w-20 h-20 text-stone-400" />
                 </div>
               )}
             </div>
           </motion.div>
 
-          {/* Name */}
+          {/* Name - BIGGER */}
           <motion.h2
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="font-serif text-2xl text-stone-800 text-center mb-6"
+            className="font-serif text-3xl md:text-4xl text-stone-800 text-center mb-8"
             data-testid="guest-name"
           >
             {guestName}
           </motion.h2>
 
           {/* Decorative line */}
-          <div className="flex items-center justify-center gap-4 mb-4">
-            <div className="h-px w-16 bg-stone-200" />
-            <div className="h-px w-16 bg-stone-200" />
+          <div className="flex items-center justify-center gap-4 mb-6">
+            <div className="h-px w-20 bg-stone-200" />
+            <div className="h-px w-20 bg-stone-200" />
           </div>
 
-          {/* Question */}
+          {/* Question - BIGGER */}
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
-            className="font-accent text-lg italic text-stone-600 text-center mb-4"
+            className="font-accent text-xl md:text-2xl italic text-stone-600 text-center mb-6"
           >
             {getQuestion()}
           </motion.p>
 
-          {/* Message */}
+          {/* Message - BIGGER text */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
-            className="bg-stone-100/50 rounded-lg p-6 min-h-[120px]"
+            className="bg-stone-100/50 rounded-xl p-8 min-h-[150px]"
           >
             <p 
-              className="font-sans text-stone-700 text-center leading-relaxed"
+              className="font-sans text-lg md:text-xl text-stone-700 text-center leading-relaxed"
               data-testid="memory-message"
             >
               {message}
@@ -167,7 +167,7 @@ const FinalMemoryPage = () => {
           whileTap={{ scale: 0.98 }}
           onClick={handleFinish}
           disabled={isSubmitting}
-          className="memora-btn w-full mt-8 disabled:opacity-50"
+          className="memora-btn memora-btn-primary w-full mt-8 py-4 text-lg disabled:opacity-50"
           data-testid="finish-button"
         >
           {isSubmitting ? 'Saving...' : 'Finish'}
