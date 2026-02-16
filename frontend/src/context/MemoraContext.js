@@ -5,7 +5,7 @@ const MemoraContext = createContext();
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
-
+;
 const defaultToneQuestions = {
   wise: ["What wisdom would you share with them?", "", "", "", "", "", "", "", "", ""],
   funny: ["What's a funny memory or joke for them?", "", "", "", "", "", "", "", "", ""],

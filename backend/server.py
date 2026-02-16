@@ -43,7 +43,7 @@ class Settings(BaseModel):
     couple_names: str = "Anna & Nemanja"
     welcome_text: str = "Leave a memory for"
     background_image: Optional[str] = None
-    admin_password: str = "memora2024"
+    admin_password: str = "pavle0804"
     tone_page_enabled: bool = True
     tone_questions: dict = {
         "wise": [
@@ -162,8 +162,11 @@ async def admin_login(login: AdminLogin):
     settings = await db.settings.find_one({}, {"_id": 0})
     if not settings:
         settings = Settings().model_dump()
-    if login.password == settings.get("admin_password", "memora2024"):
+    admin_password = os.getenv("ADMIN_PASSWORD")
+    print("ENV PASS:", admin_password)
+    if login.password == admin_password:
         return {"success": True, "message": "Login successful"}
+
     raise HTTPException(status_code=401, detail="Invalid password")
 
 @api_router.put("/admin/settings")

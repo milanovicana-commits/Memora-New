@@ -2,62 +2,18 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Settings } from 'lucide-react';
+import mojlogo from "../assets/mojlogo.png";
 
-// SVG Logo component matching the original design
 const MemoraLogo = ({ className = "" }) => (
-  <svg 
-    width="100" 
-    height="90" 
-    viewBox="0 0 100 90" 
-    fill="none" 
-    xmlns="http://www.w3.org/2000/svg"
+  <img
+    src={mojlogo}
+    alt="Memora logo"
     className={className}
-  >
-    {/* M shape with crown-like top */}
-    <path 
-      d="M10 75V25L30 50L50 20L70 50L90 25V75" 
-      stroke="currentColor" 
-      strokeWidth="3" 
-      fill="none"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    {/* Left vertical line */}
-    <path 
-      d="M30 50V75" 
-      stroke="currentColor" 
-      strokeWidth="3" 
-      strokeLinecap="round"
-    />
-    {/* Right vertical line */}
-    <path 
-      d="M70 50V75" 
-      stroke="currentColor" 
-      strokeWidth="3" 
-      strokeLinecap="round"
-    />
-    {/* Top crown detail */}
-    <path 
-      d="M42 12L50 4L58 12" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      fill="none"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    {/* Horizontal line under crown */}
-    <path 
-      d="M35 18L65 18" 
-      stroke="currentColor" 
-      strokeWidth="1.5" 
-      strokeLinecap="round"
-    />
-  </svg>
+  />
 );
 
 const LandingPage = () => {
   const navigate = useNavigate();
-
   return (
     <div className="min-h-screen bg-[#FDFCF8] flex flex-col items-center justify-center relative overflow-hidden">
       {/* Paper texture */}
