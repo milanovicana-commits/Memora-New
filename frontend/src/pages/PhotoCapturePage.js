@@ -118,17 +118,24 @@ const PhotoCapturePage = () => {
   };
 
   const confirmPhoto = () => {
+  setPhotoConfirmed(true);
+
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+  }
+};
+
+const goToNext = () => {
+  if (capturedPhoto) {
     setPhoto(capturedPhoto);
-    setPhotoConfirmed(true);
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-    }
-  };
+  }
 
-  const goToNext = () => {
-    navigate('/tone');
-  };
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+  }
 
+  navigate('/tone');
+};
   const skipPhoto = () => {
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
@@ -223,39 +230,26 @@ const PhotoCapturePage = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
           className="flex items-center justify-center gap-6 mt-8"
-        >
-          {capturedPhoto ? (
-            photoConfirmed ? (
-              /* Photo confirmed - show Next button */
-              <button
-                onClick={goToNext}
-                className="memora-btn memora-btn-primary flex items-center gap-2 px-8"
-                data-testid="next-button"
-              >
-                Next
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            ) : (
-              /* Photo taken but not confirmed - show retake and confirm */
-              <>
-                <button
-                  onClick={retake}
-                  className="p-4 rounded-full bg-white/80 backdrop-blur-sm shadow-sm hover:bg-white transition-all"
-                  data-testid="retake-button"
-                  aria-label="Retake photo"
-                >
-                  <RotateCcw className="w-6 h-6 text-stone-700" />
-                </button>
-                <button
-                  onClick={confirmPhoto}
-                  className="capture-btn flex items-center justify-center bg-stone-900"
-                  data-testid="confirm-button"
-                  aria-label="Confirm photo"
-                >
-                  <Check className="w-8 h-8 text-white" />
-                </button>
-              </>
-            )
+        >{capturedPhoto ? (
+  <>
+    <button
+      onClick={retake}
+      className="p-4 rounded-full bg-white/80 backdrop-blur-sm shadow-sm hover:bg-white transition-all"
+      data-testid="retake-button"
+      aria-label="Retake photo"
+    >
+      <RotateCcw className="w-6 h-6 text-stone-700" />
+    </button>
+
+    <button
+      onClick={goToNext}
+      className="memora-btn memora-btn-primary flex items-center gap-2 px-8"
+      data-testid="next-button"
+    >
+      Next
+      <ChevronRight className="w-5 h-5" />
+    </button>
+  </>
           ) : (
             <>
               {!cameraError && (

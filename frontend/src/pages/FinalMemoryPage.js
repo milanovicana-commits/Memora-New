@@ -7,6 +7,7 @@ import { User } from 'lucide-react';
 const FinalMemoryPage = () => {
   const navigate = useNavigate();
   const { guestName, photo, message, selectedTone, settings, submitMemory } = useMemora();
+  console.log("PHOTO FROM CONTEXT:", photo);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
 

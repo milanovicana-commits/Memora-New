@@ -4,56 +4,7 @@ import { motion } from 'framer-motion';
 import { useMemora } from '../context/MemoraContext';
 
 // SVG Logo component matching the original design
-const MemoraLogo = ({ className = "" }) => (
-  <svg 
-    width="80" 
-    height="72" 
-    viewBox="0 0 100 90" 
-    fill="none" 
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-  >
-    {/* M shape with crown-like top */}
-    <path 
-      d="M10 75V25L30 50L50 20L70 50L90 25V75" 
-      stroke="currentColor" 
-      strokeWidth="3" 
-      fill="none"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    {/* Left vertical line */}
-    <path 
-      d="M30 50V75" 
-      stroke="currentColor" 
-      strokeWidth="3" 
-      strokeLinecap="round"
-    />
-    {/* Right vertical line */}
-    <path 
-      d="M70 50V75" 
-      stroke="currentColor" 
-      strokeWidth="3" 
-      strokeLinecap="round"
-    />
-    {/* Top crown detail */}
-    <path 
-      d="M42 12L50 4L58 12" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      fill="none"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    {/* Horizontal line under crown */}
-    <path 
-      d="M35 18L65 18" 
-      stroke="currentColor" 
-      strokeWidth="1.5" 
-      strokeLinecap="round"
-    />
-  </svg>
-);
+import mojlogo from "../assets/mojlogo.png";
 
 const ThankYouPage = () => {
   const navigate = useNavigate();
@@ -145,7 +96,11 @@ const ThankYouPage = () => {
           transition={{ delay: 0.9 }}
           className="mt-8 flex flex-col items-center text-stone-800"
         >
-          <MemoraLogo />
+          <img
+  src={mojlogo}
+  alt="Memora logo"
+  className="w-24 mx-auto"
+/>
           <span className="font-serif text-xl tracking-[0.2em] mt-2">MEMORA</span>
         </motion.div>
       </motion.div>
