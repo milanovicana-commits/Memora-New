@@ -341,7 +341,7 @@ async def download_event_memories_pdf(event_id: str):
         
         # Question - BIGGER
         c.setFont("Helvetica-Oblique", 16)
-        question = "What do you wish them never to forget?"
+        question = memory.get("question", "")
         question_width = c.stringWidth(question, "Helvetica-Oblique", 16)
         c.drawString((width - question_width) / 2, height - 6.8*inch, question)
         
@@ -412,6 +412,7 @@ async def create_memory(memory: MemoryCreate):
     memory_data = memory.model_dump()
     memory_data.pop('event_code', None)
     memory_data['event_id'] = event_id
+    memory_data['question'] = memory.question   
     
     memory_obj = Memory(**memory_data)
     doc = memory_obj.model_dump()
