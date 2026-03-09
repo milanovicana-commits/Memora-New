@@ -6,6 +6,8 @@ import { useMemora } from '../context/MemoraContext';
 import { QRCodeSVG } from 'qrcode.react';
 import axios from 'axios';
 import { Toaster, toast } from 'sonner';
+import mojLogo from "../assets/mojlogo.png";
+
 
 const toneLabels = {
   wise: 'Wise',
@@ -21,16 +23,6 @@ const defaultQuestions = {
   emotional: ["What heartfelt message do you have for them?", "", "", "", "", "", "", "", "", ""]
 };
 
-// M Logo for QR Code
-const MemoraLogoSVG = () => (
-  <svg width="40" height="40" viewBox="0 0 100 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="100" height="90" fill="white" rx="8"/>
-    <path d="M15 70V30L32 50L50 25L68 50L85 30V70" stroke="#1C1917" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M32 50V70" stroke="#1C1917" strokeWidth="4" strokeLinecap="round"/>
-    <path d="M68 50V70" stroke="#1C1917" strokeWidth="4" strokeLinecap="round"/>
-    <path d="M42 15L50 7L58 15" stroke="#1C1917" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -364,14 +356,13 @@ const AdminPage = () => {
                 size={200}
                 level="H"
                 includeMargin={true}
-                imageSettings={{
-                  src: "data:image/svg+xml;base64," + btoa('<svg width="40" height="40" viewBox="0 0 100 90" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="90" fill="white" rx="8"/><path d="M15 70V30L32 50L50 25L68 50L85 30V70" stroke="#1C1917" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round"/><path d="M32 50V70" stroke="#1C1917" strokeWidth="4" strokeLinecap="round"/><path d="M68 50V70" stroke="#1C1917" strokeWidth="4" strokeLinecap="round"/><path d="M42 15L50 7L58 15" stroke="#1C1917" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>'),
-                  x: undefined,
-                  y: undefined,
-                  height: 40,
-                  width: 40,
-                  excavate: true,
-                }}
+               imageSettings={{
+               src: mojLogo,
+               height: 60,
+               width: 60,
+              excavate: true,
+          }}
+
               />
             </div>
             

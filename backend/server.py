@@ -22,20 +22,35 @@ from reportlab.pdfbase.ttfonts import TTFont
 import tempfile
 import urllib.request
 import random
+import certifi
+import uuid
+
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 # MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+mongo_url = os.environ["MONGO_URL"]
+
+client = AsyncIOMotorClient(
+    mongo_url,
+    tlsCAFile=certifi.where()
+)
+
+db = client[os.environ["DB_NAME"]]
+
 
 # Create the main app without a prefix
 app = FastAPI()
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
+
+@api_router.get("/memories")
+async def get_memories():
+    memories = await db.memories.find().to_list(1000)
+    return memories
+
 
 # Define Models
 class Settings(BaseModel):
@@ -377,6 +392,14 @@ async def download_event_memories_pdf(event_id: str):
         headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
 
+@api_router.post("/events")
+async def create_event(event: dict):
+    event_id = str(uuid.uuid4())
+    event["id"] = event_id
+    await db.events.insert_one(event)
+    return event
+
+
 @api_router.post("/memories", response_model=Memory, status_code=201)
 async def create_memory(memory: MemoryCreate):
     event_id = None
@@ -397,12 +420,16 @@ async def create_memory(memory: MemoryCreate):
     return memory_obj
 
 @api_router.get("/memories", response_model=List[Memory])
-async def get_memories():
-    memories = await db.memories.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+async def get_memories(event_id: str | None = None):
+    query = {}
+    if event_id:
+        query["event_id"] = event_id
+    memories = await db.memories.find(query, {"_id": 0}).sort("created_at", -1).to_list(1000)
     for memory in memories:
-        if isinstance(memory.get('created_at'), str):
-            memory['created_at'] = datetime.fromisoformat(memory['created_at'])
+        if isinstance(memory.get("created_at"), str):
+            memory["created_at"] = datetime.fromisoformat(memory["created_at"])
     return memories
+
 
 @api_router.delete("/memories/{memory_id}")
 async def delete_memory(memory_id: str):
@@ -535,7 +562,7 @@ app.include_router(api_router)
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_origins=[os.getenv("CORS_ORIGINS", "http://localhost:3002")],
     allow_methods=["*"],
     allow_headers=["*"],
 )

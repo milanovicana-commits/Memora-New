@@ -74,7 +74,7 @@ const FinalMemoryPage = () => {
             transition={{ delay: 0.3 }}
             className="text-center mb-10"
           >
-            <h1 className="font-serif text-2xl md:text-3xl text-stone-800 italic leading-relaxed" data-testid="page-title">
+            <h1 className="font-accent text-2xl md:text-3xl text-stone-800 italic leading-relaxed" data-testid="page-title">
               This is your page in<br />their book of memories.
             </h1>
           </motion.div>
@@ -121,7 +121,7 @@ const FinalMemoryPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="font-serif text-3xl md:text-4xl text-stone-800 text-center mb-8"
+            className="font-serif text-xl md:text-2xl text-stone-350 text-center mb-8"
             data-testid="guest-name"
           >
             {guestName}
@@ -138,25 +138,27 @@ const FinalMemoryPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
-            className="font-accent text-xl md:text-2xl italic text-stone-600 text-center mb-6"
+            className="font-accent text-xl md:text-2xl italic text-stone-350 text-center mb-6"
           >
             {getQuestion()}
           </motion.p>
 
           {/* Message - BIGGER text */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
-            className="bg-stone-100/50 rounded-xl p-8 min-h-[150px]"
-          >
-            <p 
-              className="font-sans text-lg md:text-xl text-stone-700 text-center leading-relaxed"
-              data-testid="memory-message"
-            >
-              {message}
-            </p>
-          </motion.div>
+       <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.7 }}
+        className="mt-8 px-6"
+     >
+      <p
+      className="font-serif text-xl md:text-2xl text-stone-350 text-center leading-relaxed whitespace-pre-line"
+      data-testid="memory-message"
+    >
+      {message}
+    </p>
+  </motion.div>
+
+
         </div>
 
         {/* Finish button */}

@@ -32,22 +32,36 @@ const MessagePage = () => {
   };
 
   // Get random question based on selected tone
-  const getQuestion = () => {
-    if (selectedTone && settings.tone_questions && settings.tone_questions[selectedTone]) {
-      const questions = settings.tone_questions[selectedTone];
-      // If it's an array, pick a random one from non-empty questions
-      if (Array.isArray(questions)) {
-        const validQuestions = questions.filter(q => q && q.trim());
-        if (validQuestions.length > 0) {
-          const randomIndex = Math.floor(Math.random() * validQuestions.length);
-          return validQuestions[randomIndex];
-        }
-      } else if (typeof questions === 'string') {
-        return questions;
+  const [question, setQuestion] = useState("");
+  useEffect(() => {
+  if (!settings?.tone_questions) return;
+
+  let allQuestions = [];
+
+  if (selectedTone && settings.tone_questions[selectedTone]) {
+    const toneQuestions = settings.tone_questions[selectedTone];
+    allQuestions = Array.isArray(toneQuestions)
+      ? toneQuestions
+      : [toneQuestions];
+  } else {
+    // ⬇ fallback – uzmi sva pitanja iz svih tonova
+    Object.values(settings.tone_questions).forEach(q => {
+      if (Array.isArray(q)) {
+        allQuestions.push(...q);
+      } else if (typeof q === "string") {
+        allQuestions.push(q);
       }
-    }
-    return "What do you wish them never to forget?";
-  };
+    });
+  }
+
+  const valid = allQuestions.filter(q => q && q.trim());
+
+  if (valid.length > 0) {
+    const randomIndex = Math.floor(Math.random() * valid.length);
+    setQuestion(valid[randomIndex]);
+  }
+}, [selectedTone, settings]);
+
 
   const backgroundImage = settings.background_image || 'https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80';
 
@@ -77,7 +91,7 @@ const MessagePage = () => {
           className="font-serif text-2xl md:text-3xl text-stone-800 text-center mb-8"
           data-testid="page-title"
         >
-          {getQuestion()}
+          {question}
         </motion.h1>
 
         {/* Glass card form */}
