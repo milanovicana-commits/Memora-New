@@ -503,7 +503,7 @@ async def download_memories_pdf():
         
         # Question
         c.setFont("Helvetica-Oblique", 14)
-        question = "What do you wish them never to forget?"
+        question = settings.get("question", "") or "Question"
         question_width = c.stringWidth(question, "Helvetica-Oblique", 14)
         c.drawString((width - question_width) / 2, height - 6.2*inch, question)
         
