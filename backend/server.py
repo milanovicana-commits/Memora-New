@@ -283,11 +283,14 @@ async def download_event_memories_pdf(event_id: str):
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
     
-    memories = await db.memories.find({"event_id": event_id}, {"_id": 0}).sort("created_at", 1).to_list(1000)
-    
-    buffer = BytesIO()
-    width, height = A4
-    c = canvas.Canvas(buffer, pagesize=A4)
+   memories = await db.memories.find({"event_id": event_id}, {"_id": 0}).sort("created_at", -1).to_list(None)
+
+   for m in memories:
+    print("PDF MEMORY:", m)
+
+   buffer = BytesIO()
+   width, height = A4
+   c = canvas.Canvas(buffer, pagesize=A4)
     
     for i, memory in enumerate(memories):
         # Draw decorative border
@@ -419,6 +422,7 @@ async def create_memory(memory: MemoryCreate):
     
     memory_obj = Memory(**memory_data)
     doc = memory_obj.model_dump()
+    print("INSERT DOC:", doc)
     doc['created_at'] = doc['created_at'].isoformat()
     await db.memories.insert_one(doc)
     return memory_obj
