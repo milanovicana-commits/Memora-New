@@ -137,6 +137,7 @@ class MemoryCreate(BaseModel):
     photo: Optional[str] = None
     message: str
     tone: Optional[str] = None
+    question: str | None = None
 
 class AdminLogin(BaseModel):
     password: str
@@ -410,6 +411,7 @@ async def create_memory(memory: MemoryCreate):
         event_id = event['id']
     
     memory_data = memory.model_dump()
+    print(memory_data)
     memory_data.pop('event_code', None)
     memory_data['event_id'] = event_id
     memory_data['question'] = memory.question   
