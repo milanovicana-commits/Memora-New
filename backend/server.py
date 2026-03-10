@@ -129,6 +129,7 @@ class Memory(BaseModel):
     photo: Optional[str] = None
     message: str
     tone: Optional[str] = None
+    question: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class MemoryCreate(BaseModel):
