@@ -6,9 +6,8 @@ import { useMemora } from '../context/MemoraContext';
 const MAX_CHARS = 200;
 
 const MessagePage = () => {
-  const navigate = useNavigate();
-  const { message, setMessage, guestName, selectedTone, settings } = useMemora();
-  const [inputValue, setInputValue] = useState(message);
+const navigate = useNavigate();
+const { message, setMessage, guestName, selectedTone, settings, setSelectedQuestion } = useMemora();   const [inputValue, setInputValue] = useState(message);
 
   // Redirect if no name entered
   useEffect(() => {
@@ -24,11 +23,12 @@ const MessagePage = () => {
     }
   };
 
-  const handleContinue = () => {
+   const handleContinue = () => {
     if (inputValue.trim()) {
-      setMessage(inputValue.trim());
-      navigate('/memory');
-    }
+     setMessage(inputValue.trim());
+     setSelectedQuestion(question);
+     navigate('/memory');
+   }
   };
 
   // Get random question based on selected tone
