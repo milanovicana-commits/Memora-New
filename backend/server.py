@@ -341,7 +341,7 @@ async def download_event_memories_pdf(event_id: str):
         
         # Question - BIGGER
         c.setFont("Helvetica-Oblique", 16)
-        question = memory.get("question", "")
+        question = memory.get("question") or "What do you wish them never to forget?"
         question_width = c.stringWidth(question, "Helvetica-Oblique", 16)
         c.drawString((width - question_width) / 2, height - 6.8*inch, question)
         
