@@ -420,10 +420,11 @@ async def create_memory(memory: MemoryCreate):
     memory_data['event_id'] = event_id
     memory_data['question'] = memory.question   
     
-    memory_obj = Memory(**memory_data)
-    doc = memory_obj.model_dump()
-    print("INSERT DOC:", doc)
+    doc = memory_data
     doc['created_at'] = doc['created_at'].isoformat()
+
+    print("INSERT DOC:", doc)
+    
     await db.memories.insert_one(doc)
     return memory_obj
 
