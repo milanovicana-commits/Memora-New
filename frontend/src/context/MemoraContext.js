@@ -27,6 +27,7 @@ export const MemoraProvider = ({ children }) => {
     tone_page_enabled: true,
     tone_questions: defaultToneQuestions
   });
+  const [selectedQuestion, setSelectedQuestion] = useState("");  
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -113,7 +114,8 @@ export const MemoraProvider = ({ children }) => {
         guest_name: guestName,
         photo: photo,
         message: message,
-        tone: selectedTone
+        tone: selectedTone,
+        question: selectedQuestion
       });
       return response.data;
     } catch (error) {
@@ -138,6 +140,8 @@ export const MemoraProvider = ({ children }) => {
     setMessage,
     selectedTone,
     setSelectedTone,
+    selectedQuestion,
+    setSelectedQuestion,
     currentEvent,
     setCurrentEvent,
     eventCode,
