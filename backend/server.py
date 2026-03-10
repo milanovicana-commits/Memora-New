@@ -416,17 +416,19 @@ async def create_memory(memory: MemoryCreate):
     
     memory_data = memory.model_dump()
     print(memory_data)
+
     memory_data.pop('event_code', None)
     memory_data['event_id'] = event_id
-    memory_data['question'] = memory.question   
-    
-    doc = memory_data
-    doc['created_at'] = doc['created_at'].isoformat()
+    memory_data['question'] = memory.question
+   
+   doc = memory_data
+   doc['created_at'] = datetime.now(timezone.utc).isoformat()
 
-    print("INSERT DOC:", doc)
-    
-    await db.memories.insert_one(doc)
-    return memory_obj
+   print("INSERT DOC:", doc)
+
+  await db.memories.insert_one(doc)
+
+  return Memory(**doc)
 
 @api_router.get("/memories", response_model=List[Memory])
 async def get_memories(event_id: str | None = None):
