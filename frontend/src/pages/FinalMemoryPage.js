@@ -6,8 +6,7 @@ import { User } from 'lucide-react';
 
 const FinalMemoryPage = () => {
   const navigate = useNavigate();
-  const { guestName, photo, message, selectedTone, settings, submitMemory } = useMemora();
-  console.log("PHOTO FROM CONTEXT:", photo);
+  const { guestName, photo, message, selectedTone, settings, submitMemory, selectedQuestion } = useMemora();  console.log("PHOTO FROM CONTEXT:", photo);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
@@ -37,21 +36,6 @@ const FinalMemoryPage = () => {
     navigate('/thankyou');
   };
 
-  // Get the question based on selected tone
-  const getQuestion = () => {
-    if (selectedTone && settings.tone_questions && settings.tone_questions[selectedTone]) {
-      const questions = settings.tone_questions[selectedTone];
-      if (Array.isArray(questions)) {
-        const validQuestions = questions.filter(q => q && q.trim());
-        if (validQuestions.length > 0) {
-          return validQuestions[0];
-        }
-      } else if (typeof questions === 'string') {
-        return questions;
-      }
-    }
-    return "What do you wish them never to forget?";
-  };
 
   return (
     <div className="min-h-screen bg-[#FDFCF8] flex flex-col items-center justify-center relative overflow-hidden py-8">
@@ -140,7 +124,7 @@ const FinalMemoryPage = () => {
             transition={{ delay: 0.6 }}
             className="font-accent text-xl md:text-2xl italic text-stone-350 text-center mb-6"
           >
-            {getQuestion()}
+            {selectedQuestion}
           </motion.p>
 
           {/* Message - BIGGER text */}
