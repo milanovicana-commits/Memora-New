@@ -416,8 +416,9 @@ async def create_memory(memory: MemoryCreate):
     
     memory_data = memory.model_dump()
     print(memory_data)
+    print("REQUEST QUESTION:", memory.question)
     print("QUESTION KOJI SE ČUVA:", memory_data.get("question"))
-    
+
 
     memory_data.pop('event_code', None)
     memory_data['event_id'] = event_id
