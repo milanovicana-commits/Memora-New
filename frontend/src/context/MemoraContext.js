@@ -129,6 +129,7 @@ export const MemoraProvider = ({ children }) => {
     setPhoto(null);
     setMessage('');
     setSelectedTone(null);
+    setSelectedQuestion(null); 
   };
 
   const value = {

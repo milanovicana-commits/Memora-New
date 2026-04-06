@@ -24,12 +24,16 @@ const { message, setMessage, guestName, selectedTone, settings, setSelectedQuest
   };
 
    const handleContinue = () => {
-    if (inputValue.trim()) {
-     setMessage(inputValue.trim());
-     setSelectedQuestion(question);
-     navigate('/memory');
-   }
-  };
+  if (!inputValue.trim() || !question) return;
+
+  console.log("FINAL QUESTION:", question);
+
+  setMessage(inputValue.trim());
+  const finalQuestion = question;
+  setSelectedQuestion(finalQuestion);
+
+  navigate('/memory');
+};
 
   // Get random question based on selected tone
   const [question, setQuestion] = useState("");
