@@ -30,13 +30,18 @@ const { message, setMessage, guestName, selectedTone, settings, setSelectedQuest
 
   setMessage(inputValue.trim());
   const finalQuestion = question;
-  setSelectedQuestion(finalQuestion);
+  setSelectedQuestion(question || "");
 
   navigate('/memory');
 };
 
   // Get random question based on selected tone
   const [question, setQuestion] = useState("");
+  useEffect(() => {
+  setSelectedQuestion("");
+}, []);
+
+
   useEffect(() => {
   if (!settings?.tone_questions) return;
 

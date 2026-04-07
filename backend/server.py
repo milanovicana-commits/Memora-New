@@ -25,6 +25,8 @@ import random
 import certifi
 import uuid
 
+print("SERVER STARTED NEW VERSION")
+
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -278,6 +280,7 @@ async def get_event_memories(event_id: str):
     return memories
 
 @api_router.get("/events/{event_id}/pdf")
+print("🔥 PDF ENDPOINT HIT 🔥")
 async def download_event_memories_pdf(event_id: str):
     event = await db.events.find_one({"id": event_id}, {"_id": 0})
     if not event:
@@ -285,8 +288,9 @@ async def download_event_memories_pdf(event_id: str):
     
    memories = await db.memories.find({"event_id": event_id}, {"_id": 0}).sort("created_at", -1).to_list(None)
 
-   for m in memories:
-    print("PDF MEMORY:", m)
+   for memory in memories:s
+    print("PDF MEMORY:", memory)
+    print("PDF QUESTION:", memory.get("question"))
 
    buffer = BytesIO()
    width, height = A4
